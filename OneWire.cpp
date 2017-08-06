@@ -4,6 +4,15 @@ Copyright (c) 2007, Jim Studt  (original old version - many contributors since)
 The latest version of this library may be found at:
   http://www.pjrc.com/teensy/td_libs_OneWire.html
 
+This version adds the "No-Resistor" pull-up changes from
+  https://github.com/bigjosh/OneWireNoResistor
+
+More info at
+  http://wp.josh.com/2014/06/21/no-external-pull-up-needed-for-ds18b20-temp-sensor
+
+Josh's version does not run on ESP8266, because the definitions 
+were added to OneWire after.
+
 OneWire has been maintained by Paul Stoffregen (paul@pjrc.com) since
 January 2010.
 
@@ -182,6 +191,7 @@ uint8_t OneWire::reset(void)
 	delayMicroseconds(480);
 	noInterrupts();
 	DIRECT_MODE_INPUT(reg, mask);	// allow it to float
+	DIRECT_WRITE_HIGH(reg, mask); // enable pull-up resistor
 	delayMicroseconds(70);
 	r = !DIRECT_READ(reg, mask);
 	interrupts();
@@ -232,6 +242,7 @@ uint8_t OneWire::read_bit(void)
 	DIRECT_WRITE_LOW(reg, mask);
 	delayMicroseconds(3);
 	DIRECT_MODE_INPUT(reg, mask);	// let pin float, pull up will raise
+	DIRECT_WRITE_HIGH(reg, mask);   // enable pull-up resistor	
 	delayMicroseconds(10);
 	r = DIRECT_READ(reg, mask);
 	interrupts();
@@ -255,7 +266,7 @@ void OneWire::write(uint8_t v, uint8_t power /* = 0 */) {
     if ( !power) {
 	noInterrupts();
 	DIRECT_MODE_INPUT(baseReg, bitmask);
-	DIRECT_WRITE_LOW(baseReg, bitmask);
+	// DIRECT_WRITE_LOW(baseReg, bitmask);
 	interrupts();
     }
 }
@@ -266,7 +277,7 @@ void OneWire::write_bytes(const uint8_t *buf, uint16_t count, bool power /* = 0 
   if (!power) {
     noInterrupts();
     DIRECT_MODE_INPUT(baseReg, bitmask);
-    DIRECT_WRITE_LOW(baseReg, bitmask);
+    // DIRECT_WRITE_LOW(baseReg, bitmask);
     interrupts();
   }
 }
